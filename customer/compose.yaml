@@ -1,8 +1,9 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    container_name: 'customer-postgres'
+    image: 'postgres:16.1'
     environment:
-      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_DB=customer'
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
     ports:
