@@ -1,6 +1,6 @@
 package br.com.customer.service;
 
-import br.com.customer.model.Customer;
+import br.com.customer.model.entity.Customer;
 import br.com.customer.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
