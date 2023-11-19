@@ -1,5 +1,6 @@
 package br.com.customer.model.dto;
 
+import br.com.customer.model.entity.Customer;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,4 +20,13 @@ public class CustomerDTO {
 
     @NotBlank(message = "O campo email precisa ser preenchido.")
     private String email;
+
+    public Customer fromDTO() {
+        Customer customer = new Customer();
+        customer.setName(this.name);
+        customer.setDocument(this.document);
+        customer.setEmail(this.email);
+
+        return customer;
+    }
 }

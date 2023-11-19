@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/customer")
@@ -26,14 +27,11 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
     @PostMapping(value = "/save")
-    public ResponseEntity<Customer> save(@Valid @RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<CustomerDTO> save(@Valid @RequestBody CustomerDTO customerDTO) {
         LOGGER.info("Iniciando o processo de persistência do customer.");
         LOGGER.info(String.format("Dados que foram recebidos via @RequestBody: %s", customerDTO.toString()));
 
-        final Customer customer = new Customer();
-        customer.setName(customerDTO.getName());
-        customer.setDocument(customerDTO.getDocument());
-        customer.setEmail(customerDTO.getEmail());
+        final Customer customer = customerDTO.fromDTO();
 
         LOGGER.info("Criação da entidade customer concluída com sucesso.");
 
@@ -53,7 +51,17 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/findAll")
-    public ResponseEntity<List<Customer>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(customerService.findAll());
+    public ResponseEntity<List<CustomerDTO>> findAll() {
+        LOGGER.info("Iniciando o processo de busca de todos os customers.");
+
+        final List<Customer> customers = customerService.findAll();
+
+        LOGGER.info("Busca de todos os customers foi concluída com sucesso.");
+
+        final List<CustomerDTO> customersDTO = customers.stream().map(Customer::toDTO).collect(Collectors.toList());
+
+        LOGGER.info(String.format("Dados encontrados: %s", customersDTO.stream().map(CustomerDTO::toString).collect(Collectors.toList())));
+
+        return ResponseEntity.status(HttpStatus.OK).body(customersDTO);
     }
 }
