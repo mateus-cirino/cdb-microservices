@@ -41,7 +41,7 @@ public class CustomerController {
             LOGGER.info("Tentando persistir o customer.");
             final Customer newCustomer = customerService.save(customer);
             LOGGER.info(String.format("Persistência concluída com sucesso. Id do customer: %s.", newCustomer.getId()));
-            responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(customer);
+            responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(customer.toDTO());
         } catch (final Exception e) {
             LOGGER.error(String.format("Não foi possível persistir o customer, mensagem de erro: %s. Classe: CustomerController, método: save.", e.getMessage()));
             throw new CustomerSaveException(e.getMessage());
