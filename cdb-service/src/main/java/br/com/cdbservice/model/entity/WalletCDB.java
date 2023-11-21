@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,12 +32,18 @@ public class WalletCDB {
     @Column
     private BigDecimal amount;
 
+    @Transient
+    public BigDecimal getValue() {
+        return amount.multiply(paper.getValue());
+    }
+
     public WalletCDBDTO toDTO() {
         WalletCDBDTO walletCDBDTO = new WalletCDBDTO();
         walletCDBDTO.setId(this.id);
         walletCDBDTO.setPaper(this.paper.toDTO());
         walletCDBDTO.setCustomerId(this.customerId);
         walletCDBDTO.setAmount(this.amount);
+        walletCDBDTO.setValue(this.getValue());
 
         return walletCDBDTO;
     }

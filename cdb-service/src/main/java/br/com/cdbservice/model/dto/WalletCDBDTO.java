@@ -21,6 +21,8 @@ public class WalletCDBDTO {
     @NotNull
     private BigDecimal amount;
 
+    private BigDecimal value;
+
     public WalletCDB fromDTO() {
         WalletCDB walletCDB = new WalletCDB();
         walletCDB.setId(this.id);
