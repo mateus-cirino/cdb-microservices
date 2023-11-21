@@ -1,9 +1,10 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    container_name: 'cdb-service-postgres'
+    image: 'postgres:16.1'
     environment:
-      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_DB=cdb-service'
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
     ports:
-      - '5432'
+      - '5433:5432'
