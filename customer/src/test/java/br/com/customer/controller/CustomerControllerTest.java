@@ -1,5 +1,6 @@
 package br.com.customer.controller;
 
+import br.com.customer.exception.CustomerNotFoundException;
 import br.com.customer.exception.CustomerSaveException;
 import br.com.customer.model.dto.CustomerDTO;
 import org.junit.jupiter.api.Assertions;
@@ -117,5 +118,24 @@ class CustomerControllerTest {
         Assertions.assertNotNull(customerSaved.getId());
 
         Assertions.assertNotEquals(Collections.emptyList(), customerController.findAll().getBody());
+    }
+
+    @Test
+    void findByIdCustomerThatExistsSucess() {
+        final CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setName("Mateus");
+        customerDTO.setDocument("Identidade");
+        customerDTO.setEmail("mateus@gmail.com");
+
+        final CustomerDTO customerSaved = customerController.save(customerDTO).getBody();
+
+        Assertions.assertEquals(customerController.findById(customerSaved.getId()).getBody().getId(), customerSaved.getId());
+    }
+
+    @Test
+    void findByIdCustomerThatNotExistsFailure() {
+        Assertions.assertThrowsExactly(CustomerNotFoundException.class, () -> {
+            customerController.findById(1L);
+        });
     }
 }

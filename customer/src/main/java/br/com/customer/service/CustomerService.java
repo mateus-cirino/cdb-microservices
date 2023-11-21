@@ -37,14 +37,14 @@ public class CustomerService {
 
         final Optional<Customer> optCustomer = customerRepository.findById(id);
 
-        Customer customerFound = new Customer();
+        final Customer customerFound;
 
         if (optCustomer.isPresent()) {
             log.info(String.format("Customer de id %s encontrado com sucesso.", id));
 
             customerFound = optCustomer.get();
         } else {
-            new CustomerNotFoundException(String.format("O customer de id %s não existe", id));
+            throw new CustomerNotFoundException(String.format("O customer de id %s não existe", id));
         }
 
         return customerFound;
