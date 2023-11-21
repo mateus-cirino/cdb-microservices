@@ -1,5 +1,6 @@
 package br.com.cdbservice.model.entity;
 
+import br.com.cdbservice.model.dto.PaperDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +19,14 @@ public class Paper {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private BigDecimal value;
+
+    public PaperDTO toDTO() {
+        PaperDTO paperDTO = new PaperDTO();
+        paperDTO.setId(this.id);
+        paperDTO.setValue(this.value);
+
+        return paperDTO;
+    }
 }
