@@ -18,13 +18,13 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String document;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String email;
 
     public CustomerDTO toDTO() {
