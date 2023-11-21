@@ -1,6 +1,5 @@
 package br.com.customer.controller;
 
-import br.com.customer.exception.CustomerSaveException;
 import br.com.customer.model.dto.CustomerDTO;
 import br.com.customer.model.entity.Customer;
 import br.com.customer.service.CustomerService;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,21 +32,24 @@ public class CustomerController {
 
         final Customer customer = customerDTO.fromDTO();
 
-        log.info("Criação da entidade customer concluída com sucesso.");
+        log.info("Parse da entidade customer para customerDTO concluída com sucesso.");
 
-        final ResponseEntity responseEntity;
+        final CustomerDTO newCustomerDTO = customerService.save(customer).toDTO();
 
-        try {
-            log.info("Tentando persistir o customer.");
-            final Customer newCustomer = customerService.save(customer);
-            log.info(String.format("Persistência concluída com sucesso. Id do customer: %s.", newCustomer.getId()));
-            responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(customer.toDTO());
-        } catch (final Exception e) {
-            log.error(String.format("Não foi possível persistir o customer, mensagem de erro: %s. Classe: CustomerController, método: save.", e.getMessage()));
-            throw new CustomerSaveException(e.getMessage());
-        }
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newCustomerDTO.toString()));
 
-        return responseEntity;
+        return ResponseEntity.status(HttpStatus.OK).body(newCustomerDTO);
+    }
+
+    @GetMapping(value = "/findById")
+    public ResponseEntity<CustomerDTO> findById(@RequestParam final Long id) {
+        log.info(String.format("Iniciando o processo de busca do customer com o id %s.", id));
+
+        final CustomerDTO customerFound = customerService.findById(id).toDTO();
+
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customerFound.toString()));
+
+        return ResponseEntity.status(HttpStatus.OK).body(customerFound);
     }
 
     @GetMapping(value = "/findAll")
@@ -55,11 +58,9 @@ public class CustomerController {
 
         final List<Customer> customers = customerService.findAll();
 
-        log.info("Busca de todos os customers foi concluída com sucesso.");
-
         final List<CustomerDTO> customersDTO = customers.stream().map(Customer::toDTO).collect(Collectors.toList());
 
-        log.info(String.format("Dados encontrados: %s", customersDTO.stream().map(CustomerDTO::toString).collect(Collectors.toList())));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customersDTO.stream().map(CustomerDTO::toString).collect(Collectors.toList())));
 
         return ResponseEntity.status(HttpStatus.OK).body(customersDTO);
     }

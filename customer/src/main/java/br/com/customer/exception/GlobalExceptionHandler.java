@@ -17,4 +17,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCustomerSaveException(CustomerSaveException e) {
         return ResponseEntity.badRequest().body(String.format("Erro ao salvar o customer: %s", e.getMessage()));
     }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleCustomerNotFoundException(CustomerNotFoundException e) {
+        return ResponseEntity.badRequest().body(String.format("Erro ao buscar o customer: %s", e.getMessage()));
+    }
 }
