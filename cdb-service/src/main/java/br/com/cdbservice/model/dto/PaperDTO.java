@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class PaperDTO {
     private Long id;
 
-    @NotNull
+    @NotNull(message = "O campo valor precisa ser preenchido.")
     private BigDecimal value;
 
     public Paper fromDTO() {

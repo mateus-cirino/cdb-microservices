@@ -12,13 +12,13 @@ import java.math.BigDecimal;
 public class WalletCDBDTO {
     private Long id;
 
-    @NotNull
+    @NotNull(message = "O campo paper precisa ser preenchido.")
     private PaperDTO paper;
 
-    @NotNull
+    @NotNull(message = "O campo customer precisa ser preenchido.")
     private Long customerId;
 
-    @NotNull
+    @NotNull(message = "O campo quantidade precisa ser preenchido.")
     private BigDecimal amount;
 
     private BigDecimal value;
