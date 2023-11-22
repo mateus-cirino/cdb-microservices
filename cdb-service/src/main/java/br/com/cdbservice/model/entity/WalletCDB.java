@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Entity
 @Table(name = "wallet_cdb")
@@ -34,7 +35,7 @@ public class WalletCDB {
 
     @Transient
     public BigDecimal getValue() {
-        return amount.multiply(paper.getValue());
+        return Optional.ofNullable(amount).orElse(BigDecimal.ZERO).multiply(Optional.ofNullable(paper).map(Paper::getValue).orElse(BigDecimal.ZERO));
     }
 
     public WalletCDBDTO toDTO() {

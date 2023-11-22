@@ -22,4 +22,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleWalletCDBSaveException(PaperSaveException e) {
         return ResponseEntity.badRequest().body(String.format("Erro ao salvar o wallet cdb: %s", e.getMessage()));
     }
+
+    @ExceptionHandler(PaperNotFoundException.class)
+    public ResponseEntity<String> handlePaperNotFoundException(PaperNotFoundException e) {
+        return ResponseEntity.badRequest().body(String.format("Erro ao buscar o paper: %s", e.getMessage()));
+    }
+
+    @ExceptionHandler(WalletCDBNotFoundException.class)
+    public ResponseEntity<String> handleWalletCDBNotFoundException(WalletCDBNotFoundException e) {
+        return ResponseEntity.badRequest().body(String.format("Erro ao buscar o walletCDB: %s", e.getMessage()));
+    }
 }

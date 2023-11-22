@@ -1,9 +1,7 @@
 package br.com.cdbservice.controller;
 
-import br.com.cdbservice.exception.WalletCDBSaveException;
 import br.com.cdbservice.model.dto.WalletCDBDTO;
 import br.com.cdbservice.model.entity.WalletCDB;
-import br.com.cdbservice.service.PaperService;
 import br.com.cdbservice.service.WalletCDBService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +26,6 @@ public class WalletCDBController {
     @Autowired
     private WalletCDBService walletCDBService;
 
-    @Autowired
-    private PaperService paperService;
-
     @PostMapping(value = "/save")
     public ResponseEntity<WalletCDBDTO> save(@Valid @RequestBody WalletCDBDTO walletCDBDTO) {
         log.info("Iniciando o processo de persistência do walletCDB.");
@@ -38,22 +33,24 @@ public class WalletCDBController {
 
         final WalletCDB walletCDB = walletCDBDTO.fromDTO();
 
-        log.info("Criação da entidade walletCDB concluída com sucesso.");
+        log.info("Parse da entidade walletCDB para walletCDBDTO concluída com sucesso.");
 
-        final ResponseEntity responseEntity;
+        final WalletCDBDTO newWalletCDBDTO = walletCDBService.save(walletCDB).toDTO();
 
-        try {
-            log.info("Tentando persistir o walletCDB.");
-            final WalletCDB newWalletCDB = walletCDBService.save(walletCDB);
-            newWalletCDB.setPaper(paperService.findById(newWalletCDB.getPaper().getId()));
-            log.info(String.format("Persistência concluída com sucesso. Id do walletCDB: %s.", newWalletCDB.getId()));
-            responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(walletCDB.toDTO());
-        } catch (final Exception e) {
-            log.error(String.format("Não foi possível persistir o walletCDB, mensagem de erro: %s. Classe: WalletCDBController, método: save.", e.getMessage()));
-            throw new WalletCDBSaveException(e.getMessage());
-        }
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newWalletCDBDTO.toString()));
 
-        return responseEntity;
+        return ResponseEntity.status(HttpStatus.OK).body(newWalletCDBDTO);
+    }
+
+    @GetMapping(value = "/findById")
+    public ResponseEntity<WalletCDBDTO> findById(@RequestParam final Long id) {
+        log.info(String.format("Iniciando o processo de busca do walletCDB com o id %s.", id));
+
+        final WalletCDBDTO walletCDBFound = walletCDBService.findById(id).toDTO();
+
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", walletCDBFound.toString()));
+
+        return ResponseEntity.status(HttpStatus.OK).body(walletCDBFound);
     }
 
     @GetMapping(value = "/findAll")
@@ -62,17 +59,10 @@ public class WalletCDBController {
 
         final List<WalletCDB> walletCDBs = walletCDBService.findAll();
 
-        log.info("Busca de todos os walletCDBs foi concluída com sucesso.");
-
         final List<WalletCDBDTO> walletCDBsDTO = walletCDBs.stream().map(WalletCDB::toDTO).collect(Collectors.toList());
 
-        log.info(String.format("Dados encontrados: %s", walletCDBsDTO.stream().map(WalletCDBDTO::toString).collect(Collectors.toList())));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", walletCDBsDTO.stream().map(WalletCDBDTO::toString).collect(Collectors.toList())));
 
         return ResponseEntity.status(HttpStatus.OK).body(walletCDBsDTO);
-    }
-
-    @GetMapping(value = "/findById")
-    public ResponseEntity<WalletCDBDTO> findById(@RequestParam final Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(walletCDBService.findById(id).toDTO());
     }
 }

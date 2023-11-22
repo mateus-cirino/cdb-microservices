@@ -1,6 +1,5 @@
 package br.com.cdbservice.controller;
 
-import br.com.cdbservice.exception.PaperSaveException;
 import br.com.cdbservice.model.dto.PaperDTO;
 import br.com.cdbservice.model.entity.Paper;
 import br.com.cdbservice.service.PaperService;
@@ -33,21 +32,24 @@ public class PaperController {
 
         final Paper paper = paperDTO.fromDTO();
 
-        log.info("Criação da entidade paper concluída com sucesso.");
+        log.info("Parse da entidade paper para paperDTO concluída com sucesso.");
 
-        final ResponseEntity responseEntity;
+        final PaperDTO newPaperDTO = paperService.save(paper).toDTO();
 
-        try {
-            log.info("Tentando persistir o paper.");
-            final Paper newPaper = paperService.save(paper);
-            log.info(String.format("Persistência concluída com sucesso. Id do paper: %s.", newPaper.getId()));
-            responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(paper.toDTO());
-        } catch (final Exception e) {
-            log.error(String.format("Não foi possível persistir o paper, mensagem de erro: %s. Classe: PaperController, método: save.", e.getMessage()));
-            throw new PaperSaveException(e.getMessage());
-        }
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newPaperDTO.toString()));
 
-        return responseEntity;
+        return ResponseEntity.status(HttpStatus.OK).body(newPaperDTO);
+    }
+
+    @GetMapping(value = "/findById")
+    public ResponseEntity<PaperDTO> findById(@RequestParam final Long id) {
+        log.info(String.format("Iniciando o processo de busca do paper com o id %s.", id));
+
+        final PaperDTO paperFound = paperService.findById(id).toDTO();
+
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", paperFound.toString()));
+
+        return ResponseEntity.status(HttpStatus.OK).body(paperFound);
     }
 
     @GetMapping(value = "/findAll")
@@ -56,17 +58,10 @@ public class PaperController {
 
         final List<Paper> papers = paperService.findAll();
 
-        log.info("Busca de todos os papers foi concluída com sucesso.");
-
         final List<PaperDTO> papersDTO = papers.stream().map(Paper::toDTO).collect(Collectors.toList());
 
-        log.info(String.format("Dados encontrados: %s", papersDTO.stream().map(PaperDTO::toString).collect(Collectors.toList())));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", papersDTO.stream().map(PaperDTO::toString).collect(Collectors.toList())));
 
         return ResponseEntity.status(HttpStatus.OK).body(papersDTO);
-    }
-
-    @GetMapping(value = "/findById")
-    public ResponseEntity<PaperDTO> findById(@RequestParam final Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(paperService.findById(id).toDTO());
     }
 }
