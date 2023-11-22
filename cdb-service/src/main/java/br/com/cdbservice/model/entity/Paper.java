@@ -19,7 +19,7 @@ public class Paper {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column
+    @Column(name = "valor")
     private BigDecimal value;
 
     public PaperDTO toDTO() {
