@@ -25,7 +25,7 @@ public class CustomerService {
             customer.setId(newCustomer.getId());
             log.info(String.format("Persistência concluída com sucesso. Id do customer: %s.", newCustomer.getId()));
         } catch (final Exception e) {
-            log.error(String.format("Não foi possível persistir o customer, mensagem de erro: %s. Classe: CustomerController, método: save.", e.getMessage()));
+            log.error(String.format("Não foi possível persistir o customer, mensagem de erro: %s. Classe: %s, método: save.", e.getMessage(), CustomerService.class.getSimpleName()));
             throw new CustomerSaveException(e.getMessage());
         }
 
