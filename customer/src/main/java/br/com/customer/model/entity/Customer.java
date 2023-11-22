@@ -28,7 +28,7 @@ public class Customer {
     private String email;
 
     public CustomerDTO toDTO() {
-        CustomerDTO customerDTO = new CustomerDTO();
+        final CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setId(this.id);
         customerDTO.setName(this.name);
         customerDTO.setDocument(this.document);

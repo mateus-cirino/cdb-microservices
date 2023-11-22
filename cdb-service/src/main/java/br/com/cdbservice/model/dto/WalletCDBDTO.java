@@ -24,7 +24,7 @@ public class WalletCDBDTO {
     private BigDecimal value;
 
     public WalletCDB fromDTO() {
-        WalletCDB walletCDB = new WalletCDB();
+        final WalletCDB walletCDB = new WalletCDB();
         walletCDB.setId(this.id);
         walletCDB.setPaper(this.paper.fromDTO());
         walletCDB.setCustomerId(this.customerId);

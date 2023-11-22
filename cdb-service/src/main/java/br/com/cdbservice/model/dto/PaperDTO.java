@@ -16,7 +16,7 @@ public class PaperDTO {
     private BigDecimal value;
 
     public Paper fromDTO() {
-        Paper paper = new Paper();
+        final Paper paper = new Paper();
         paper.setId(this.id);
         paper.setValue(this.value);
 

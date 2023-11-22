@@ -22,7 +22,7 @@ public class CustomerDTO {
     private String email;
 
     public Customer fromDTO() {
-        Customer customer = new Customer();
+        final Customer customer = new Customer();
         customer.setName(this.name);
         customer.setDocument(this.document);
         customer.setEmail(this.email);

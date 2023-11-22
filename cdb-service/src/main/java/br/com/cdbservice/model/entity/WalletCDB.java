@@ -39,7 +39,7 @@ public class WalletCDB {
     }
 
     public WalletCDBDTO toDTO() {
-        WalletCDBDTO walletCDBDTO = new WalletCDBDTO();
+        final WalletCDBDTO walletCDBDTO = new WalletCDBDTO();
         walletCDBDTO.setId(this.id);
         walletCDBDTO.setPaper(this.paper.toDTO());
         walletCDBDTO.setCustomerId(this.customerId);
