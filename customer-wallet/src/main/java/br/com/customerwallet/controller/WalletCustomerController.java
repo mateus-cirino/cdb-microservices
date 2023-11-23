@@ -53,6 +53,11 @@ public class WalletCustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
     }
 
+    @GetMapping(value = "/addAmountToBalance")
+    public ResponseEntity<BigDecimal> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
+        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerService.addAmountToBalance(customerId, amount));
+    }
+
     @GetMapping(value = "/findById")
     public ResponseEntity<WalletCustomerDTO> findById(@RequestParam final Long id) {
         log.info(String.format("Iniciando o processo de busca do walletCustomer com o id %s.", id));
