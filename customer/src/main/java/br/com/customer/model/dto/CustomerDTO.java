@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -20,6 +22,10 @@ public class CustomerDTO {
 
     @NotBlank(message = "O campo email precisa ser preenchido.")
     private String email;
+
+    private WalletCustomerDTO walletCustomerDTO;
+
+    private List<WalletCDBDTO> walletCDBDTOList;
 
     public Customer fromDTO() {
         final Customer customer = new Customer();
