@@ -65,4 +65,13 @@ public class WalletCDBController {
 
         return ResponseEntity.status(HttpStatus.OK).body(walletCDBsDTO);
     }
+
+    @GetMapping(value = "/findAllByCustomerId")
+    public ResponseEntity<List<WalletCDBDTO>> findAllByCustomerId(@RequestParam final Long customerId) {
+        final List<WalletCDB> walletCDBsByCustomerId = walletCDBService.findAllByCustomerId(customerId);
+
+        final List<WalletCDBDTO> walletCDBsDTOByCustomerId = walletCDBsByCustomerId.stream().map(WalletCDB::toDTO).collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.OK).body(walletCDBsDTOByCustomerId);
+    }
 }
