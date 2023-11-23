@@ -1,8 +1,11 @@
 package br.com.cdbservice.controller;
 
 import br.com.cdbservice.exception.NotHasEnoughBalanceException;
+import br.com.cdbservice.model.dto.WalletCDBDTO;
 import br.com.cdbservice.model.entity.Paper;
+import br.com.cdbservice.model.entity.WalletCDB;
 import br.com.cdbservice.service.PaperService;
+import br.com.cdbservice.service.WalletCDBService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,9 @@ public class MovementController {
 
     @Autowired
     private PaperService paperService;
+
+    @Autowired
+    private WalletCDBService walletCDBService;
 
     private WebClient webClientCustomer;
 
@@ -45,7 +51,14 @@ public class MovementController {
                 .getBody();
 
         if (hasEnoughBalance) {
-            // chama o tópico do kafka para atualizar o balance do customer
+            // TODO: 23/11/2023 E se comprar um paper duas vezes?
+            final WalletCDBDTO walletCDBDTO = new WalletCDBDTO();
+            walletCDBDTO.setPaper(paper.toDTO());
+            walletCDBDTO.setAmount(amount);
+            walletCDBDTO.setCustomerId(customerId);
+
+            walletCDBService.save(walletCDBDTO.fromDTO());
+            // TODO: 23/11/2023 chama o tópico do kafka para atualizar o balance do customer
         } else {
             throw new NotHasEnoughBalanceException(String.format("O customer de id %s não possuí saldo suficiente para a comprar a quantidade de %s do paper de id %s. Valor total da compra do(s) paper(s) %s.", customerId, amount, paperId, value));
         }
