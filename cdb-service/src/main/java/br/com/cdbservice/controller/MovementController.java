@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/cdb-service/movement")
 public class MovementController {
+
+    @Value("${customer.url}")
+    private String customerUrl;
 
     @Autowired
     private MovementService movementService;
@@ -41,21 +46,21 @@ public class MovementController {
 
     @PostConstruct
     private void postConstruct() {
-        webClientCustomer = WebClient.builder().baseUrl("http://localhost:8080").build();
+        webClientCustomer = WebClient.builder().baseUrl(customerUrl).build();
     }
 
     @GetMapping(value = "/buy")
     public ResponseEntity<Boolean> buy(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final BigDecimal amount) throws JsonProcessingException {
         final Paper paper = paperService.findById(paperId);
 
-        final BigDecimal value = paper.getValue().multiply(amount);
+        final BigDecimal paperValueMultiplyAmount = paper.getValue().multiply(amount);
 
-        final Boolean hasEnoughBalance = webClientCustomer.get()
-                .uri(uriBuilder -> uriBuilder.path("/customer/checkEnoughBalance").queryParam("customerId", customerId).queryParam("value", value).build())
-                .retrieve()
-                .toEntity(Boolean.class)
-                .block()
-                .getBody();
+        final Boolean hasEnoughBalance = Objects.requireNonNull(webClientCustomer.get()
+                        .uri(uriBuilder -> uriBuilder.path("/customer/checkEnoughBalance").queryParam("customerId", customerId).queryParam("amount", paperValueMultiplyAmount).build())
+                        .retrieve()
+                        .toEntity(Boolean.class)
+                        .block())
+                        .getBody();
 
         if (hasEnoughBalance) {
             // TODO: 23/11/2023 E se comprar um paper duas vezes?
@@ -68,12 +73,12 @@ public class MovementController {
 
             final WalletCustomerUpdateDTO walletCustomerUpdateDTO = new WalletCustomerUpdateDTO();
             walletCustomerUpdateDTO.setCustomerId(customerId);
-            walletCustomerUpdateDTO.setAmount(paper.getValue().multiply(amount));
+            walletCustomerUpdateDTO.setAmount(paperValueMultiplyAmount);
             walletCustomerUpdateDTO.setMovementType(MovementType.BUY);
 
             movementService.updateBalance(walletCustomerUpdateDTO);
         } else {
-            throw new NotHasEnoughBalanceException(String.format("O customer de id %s não possuí saldo suficiente para a comprar a quantidade de %s do paper de id %s. Valor total da compra do(s) paper(s) %s.", customerId, amount, paperId, value));
+            throw new NotHasEnoughBalanceException(String.format("O customer de id %s não possuí saldo suficiente para a comprar a quantidade de %s do paper de id %s. Valor total da compra do(s) paper(s) %s.", customerId, amount, paperId, paperValueMultiplyAmount));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(Boolean.TRUE);

@@ -10,7 +10,9 @@ import java.math.BigDecimal;
 @Setter
 public class WalletCustomerUpdateDTO {
     private Long customerId;
+
     private BigDecimal amount;
+
     private MovementType movementType;
 
     public BigDecimal getAmount() {

@@ -21,11 +21,15 @@ public class CustomerService {
     public Customer save(final Customer customer) {
         try {
             log.info("Tentando persistir o customer.");
+
             final Customer newCustomer = customerRepository.save(customer);
+
             customer.setId(newCustomer.getId());
+
             log.info(String.format("Persistência concluída com sucesso. Id do customer: %s.", newCustomer.getId()));
         } catch (final Exception e) {
             log.error(String.format("Não foi possível persistir o customer, mensagem de erro: %s. Classe: %s, método: save.", e.getMessage(), CustomerService.class.getSimpleName()));
+            
             throw new CustomerSaveException(e.getMessage());
         }
 

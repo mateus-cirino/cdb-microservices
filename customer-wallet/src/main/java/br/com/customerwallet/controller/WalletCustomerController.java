@@ -28,7 +28,8 @@ public class WalletCustomerController {
     @PostMapping(value = "/save")
     public ResponseEntity<WalletCustomerDTO> save(@Valid @RequestBody WalletCustomerDTO walletCustomerDTO) {
         log.info("Iniciando o processo de persistência do walletCustomer.");
-        log.info(String.format("Dados que foram recebidos na request: %s", walletCustomerDTO.toString()));
+
+        log.info("Dados que foram recebidos na request: {}", walletCustomerDTO);
 
         final WalletCustomer walletCustomer = walletCustomerDTO.fromDTO();
 
@@ -36,7 +37,7 @@ public class WalletCustomerController {
 
         final WalletCustomerDTO newWalletCustomerDTO = walletCustomerService.save(walletCustomer).toDTO();
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newWalletCustomerDTO.toString()));
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", newWalletCustomerDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(newWalletCustomerDTO);
     }
@@ -44,28 +45,41 @@ public class WalletCustomerController {
     @GetMapping(value = "/checkEnoughBalance")
     public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
         log.info("Iniciando o processo de checagem de saldo suficiente do wallet do customer.");
-        log.info(String.format("Dados que foram recebidos na request: customerId %s amount %s", customerId.toString(), amount.toString()));
+
+        log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
 
         final Boolean hasEnoughBalance = walletCustomerService.checkEnoughBalance(customerId, amount);
 
-        log.info(String.format("Tem saldo suficiente: %s", hasEnoughBalance.toString()));
+        log.info("Processo de verificacao de saldo suficiente concluido com sucesso");
+
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", hasEnoughBalance);
 
         return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
     }
 
     @GetMapping(value = "/addAmountToBalance")
     public ResponseEntity<WalletCustomerDTO> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
-        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerService.addAmountToBalance(customerId, amount).toDTO());
+        log.info("Iniciando o processo de adicao de uma quantia a wallet do customer.");
+
+        log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
+
+        final WalletCustomerDTO walletCustomerDTOUpdated = walletCustomerService.addAmountToBalance(customerId, amount).toDTO();
+
+        log.info("Processo de adição de uma quantia a wallet do customer concluida com sucesso");
+
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", walletCustomerDTOUpdated);
+
+        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerDTOUpdated);
     }
 
-    @GetMapping(value = "/findById")
-    public ResponseEntity<WalletCustomerDTO> findById(@RequestParam final Long id) {
-        log.info(String.format("Iniciando o processo de busca do walletCustomer com o id %s.", id));
+    @GetMapping(value = "/findByCustomerId")
+    public ResponseEntity<WalletCustomerDTO> findByCustomerId(@RequestParam final Long customerId) {
+        log.info("Iniciando o processo de busca do walletCustomer do customer id {}.", customerId);
 
-        final WalletCustomerDTO walletCustomerFound = walletCustomerService.findById(id).toDTO();
+        final WalletCustomerDTO walletCustomerDTOFound = walletCustomerService.findByCustomerId(customerId).toDTO();
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", walletCustomerFound.toString()));
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", walletCustomerDTOFound);
 
-        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerFound);
+        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerDTOFound);
     }
 }

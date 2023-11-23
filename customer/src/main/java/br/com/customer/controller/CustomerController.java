@@ -8,7 +8,6 @@ import br.com.customer.service.CustomerService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,6 +53,7 @@ public class CustomerController {
     @PostMapping(value = "/save")
     public ResponseEntity<CustomerDTO> save(@Valid @RequestBody CustomerDTO customerDTO) {
         log.info("Iniciando o processo de persistência do customer.");
+
         log.info(String.format("Dados que foram recebidos na request: %s", customerDTO.toString()));
 
         final Customer customer = customerDTO.fromDTO();
@@ -89,6 +88,7 @@ public class CustomerController {
     @GetMapping(value = "/checkEnoughBalance")
     public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
         log.info("Iniciando o processo de checagem de saldo suficiente do wallet do customer.");
+
         log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
 
         log.info("Solicitando ao microserviço customer-wallet a verificação de saldo suficiente.");
@@ -110,6 +110,7 @@ public class CustomerController {
     @GetMapping(value = "/addAmountToBalance")
     public ResponseEntity<WalletCustomerDTO> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
         log.info("Iniciando o processo adicao de uma quantia no wallet do customer.");
+
         log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
 
         log.info("Solicitando ao microserviço customer-wallet a adicao da quantia no wallet do customer.");
@@ -137,7 +138,7 @@ public class CustomerController {
         log.info("Solicitando ao microserviço customer-wallet a busca do wallet do customer.");
 
         final WalletCustomerDTO walletCustomerDTO = Objects.requireNonNull(webClientCustomerWallet.get()
-                        .uri(uriBuilder -> uriBuilder.path("/customer-wallet/findById").queryParam("id", id).build())
+                        .uri(uriBuilder -> uriBuilder.path("/customer-wallet/findByCustomerId").queryParam("customerId", id).build())
                         .retrieve()
                         .toEntity(WalletCustomerDTO.class)
                         .block())
