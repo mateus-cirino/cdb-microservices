@@ -32,4 +32,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleWalletCDBNotFoundException(WalletCDBNotFoundException e) {
         return ResponseEntity.badRequest().body(String.format("Erro ao buscar o walletCDB: %s", e.getMessage()));
     }
+
+    @ExceptionHandler(NotHasEnoughBalanceException.class)
+    public ResponseEntity<String> handleNotHasEnoughBalanceException(NotHasEnoughBalanceException e) {
+        return ResponseEntity.badRequest().body(String.format("Customer não possuí saldo suficiente: %s", e.getMessage()));
+    }
 }
