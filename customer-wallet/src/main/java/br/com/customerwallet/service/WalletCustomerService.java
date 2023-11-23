@@ -2,11 +2,15 @@ package br.com.customerwallet.service;
 
 import br.com.customerwallet.exception.WalletCustomerNotFoundException;
 import br.com.customerwallet.exception.WalletCustomerSaveException;
+import br.com.customerwallet.model.dto.WalletCustomerUpdateDTO;
 import br.com.customerwallet.model.entity.WalletCustomer;
 import br.com.customerwallet.repository.WalletCustomerRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,6 +19,8 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class WalletCustomerService {
+
+    private static final String updateWalletTopic = "cgr.wallet.update";
 
     @Autowired
     private WalletCustomerRepository walletCustomerRepository;
@@ -39,9 +45,17 @@ public class WalletCustomerService {
 
     @Transactional
     public WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount) {
-        walletCustomerRepository.addAmountToBalance(customerId, amount);
+        walletCustomerRepository.updateBalance(customerId, amount);
 
         return walletCustomerRepository.findByCustomerId(customerId);
+    }
+
+    @Transactional
+    @KafkaListener(topics = updateWalletTopic)
+    public void updateBalance(String message) throws JsonProcessingException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final WalletCustomerUpdateDTO walletCustomerUpdateDTO = objectMapper.readValue(message, WalletCustomerUpdateDTO.class);
+        walletCustomerRepository.updateBalance(walletCustomerUpdateDTO.getCustomerId(), walletCustomerUpdateDTO.getAmount());
     }
 
     public WalletCustomer findById(final Long id) {

@@ -2,10 +2,14 @@ package br.com.cdbservice.controller;
 
 import br.com.cdbservice.exception.NotHasEnoughBalanceException;
 import br.com.cdbservice.model.dto.WalletCDBDTO;
+import br.com.cdbservice.model.dto.WalletCustomerUpdateDTO;
 import br.com.cdbservice.model.entity.Paper;
 import br.com.cdbservice.model.entity.WalletCDB;
+import br.com.cdbservice.model.enumerated.MovementType;
+import br.com.cdbservice.service.MovementService;
 import br.com.cdbservice.service.PaperService;
 import br.com.cdbservice.service.WalletCDBService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,9 @@ import java.math.BigDecimal;
 public class MovementController {
 
     @Autowired
+    private MovementService movementService;
+
+    @Autowired
     private PaperService paperService;
 
     @Autowired
@@ -38,7 +45,7 @@ public class MovementController {
     }
 
     @GetMapping(value = "/buy")
-    public ResponseEntity<Boolean> buy(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final BigDecimal amount) {
+    public ResponseEntity<Boolean> buy(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final BigDecimal amount) throws JsonProcessingException {
         final Paper paper = paperService.findById(paperId);
 
         final BigDecimal value = paper.getValue().multiply(amount);
@@ -58,7 +65,13 @@ public class MovementController {
             walletCDBDTO.setCustomerId(customerId);
 
             walletCDBService.save(walletCDBDTO.fromDTO());
-            // TODO: 23/11/2023 chama o tópico do kafka para atualizar o balance do customer
+
+            final WalletCustomerUpdateDTO walletCustomerUpdateDTO = new WalletCustomerUpdateDTO();
+            walletCustomerUpdateDTO.setCustomerId(customerId);
+            walletCustomerUpdateDTO.setAmount(paper.getValue().multiply(amount));
+            walletCustomerUpdateDTO.setMovementType(MovementType.BUY);
+
+            movementService.updateBalance(walletCustomerUpdateDTO);
         } else {
             throw new NotHasEnoughBalanceException(String.format("O customer de id %s não possuí saldo suficiente para a comprar a quantidade de %s do paper de id %s. Valor total da compra do(s) paper(s) %s.", customerId, amount, paperId, value));
         }
@@ -67,10 +80,20 @@ public class MovementController {
     }
 
     @GetMapping(value = "/sell")
-    public ResponseEntity<Boolean> sell(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final Long amount) {
+    public ResponseEntity<Boolean> sell(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final BigDecimal amount) throws JsonProcessingException {
+        // TODO: 23/11/2023 E se não existir um CDB para esse customer e paper?
         final Paper paper = paperService.findById(paperId);
 
-        // chama o tópico do kafka para atualizar o balance do customer
+        final WalletCDB walletCDB = walletCDBService.findByCustomerIdAndPaperId(customerId, paperId);
+
+        walletCDBService.delete(walletCDB);
+
+        final WalletCustomerUpdateDTO walletCustomerUpdateDTO = new WalletCustomerUpdateDTO();
+        walletCustomerUpdateDTO.setCustomerId(customerId);
+        walletCustomerUpdateDTO.setAmount(paper.getValue().multiply(amount));
+        walletCustomerUpdateDTO.setMovementType(MovementType.SELL);
+
+        movementService.updateBalance(walletCustomerUpdateDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(Boolean.TRUE);
     }

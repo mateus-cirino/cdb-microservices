@@ -65,8 +65,25 @@ public class WalletCDBService {
     }
 
     public List<WalletCDB> findAllByCustomerId(final Long customerId) {
-        final List<WalletCDB> walletCDBsFoundByCustomerId = walletCDBRepository.findAllByCustomerId(customerId);
+        return walletCDBRepository.findAllByCustomerId(customerId);
+    }
 
-        return walletCDBsFoundByCustomerId;
+    public WalletCDB findByCustomerIdAndPaperId(final Long customerId, final Long paperId) {
+        // TODO: 23/11/2023 Criar uma unique key para customer id e paper id
+        final Optional<WalletCDB> optWalletCDB = walletCDBRepository.findByCustomerIdAndPaperId(customerId, paperId);
+
+        final WalletCDB walletCDBFound;
+
+        if (optWalletCDB.isPresent()) {
+            walletCDBFound = optWalletCDB.get();
+        } else {
+            throw new WalletCDBNotFoundException(String.format("O walletCDB do customer de id %s e paper de id %s", customerId, paperId));
+        }
+
+        return walletCDBFound;
+    }
+
+    public void delete(final WalletCDB walletCDB) {
+        walletCDBRepository.delete(walletCDB);
     }
 }

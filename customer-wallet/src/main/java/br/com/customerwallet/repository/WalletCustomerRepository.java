@@ -15,5 +15,5 @@ public interface WalletCustomerRepository extends JpaRepository<WalletCustomer, 
 
     @Modifying
     @Query("UPDATE WalletCustomer w SET w.balance = w.balance + :amount WHERE w.customerId = :customerId")
-    void addAmountToBalance(final Long customerId, final BigDecimal amount);
+    void updateBalance(final Long customerId, final BigDecimal amount);
 }
