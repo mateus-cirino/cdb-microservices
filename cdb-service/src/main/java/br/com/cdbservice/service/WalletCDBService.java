@@ -63,4 +63,10 @@ public class WalletCDBService {
 
         return walletCDBsFound;
     }
+
+    public List<WalletCDB> findAllByCustomerId(final Long customerId) {
+        final List<WalletCDB> walletCDBsFoundByCustomerId = walletCDBRepository.findAllByCustomerId(customerId);
+
+        return walletCDBsFoundByCustomerId;
+    }
 }
