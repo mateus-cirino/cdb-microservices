@@ -96,6 +96,19 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
     }
 
+    @GetMapping(value = "/addAmountToBalance")
+    public ResponseEntity<BigDecimal> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
+
+        final BigDecimal balanceUpdated = webClientCustomerWallet.get()
+                .uri(uriBuilder -> uriBuilder.path("/customer-wallet/addAmountToBalance").queryParam("customerId", customerId).queryParam("amount", amount).build())
+                .retrieve()
+                .toEntity(BigDecimal.class)
+                .block()
+                .getBody();
+
+        return ResponseEntity.status(HttpStatus.OK).body(balanceUpdated);
+    }
+
     @GetMapping(value = "/findById")
     public ResponseEntity<CustomerDTO> findById(@RequestParam final Long id) {
         log.info(String.format("Iniciando o processo de busca do customer com o id %s,sua carteira e seus cdbs.", id));
