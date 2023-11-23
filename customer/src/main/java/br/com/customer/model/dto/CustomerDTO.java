@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -26,6 +27,10 @@ public class CustomerDTO {
     private WalletCustomerDTO walletCustomerDTO;
 
     private List<WalletCDBDTO> walletCDBDTOList;
+
+    public BigDecimal getFullValue() {
+        return walletCustomerDTO.getBalance().add(walletCDBDTOList.stream().map(WalletCDBDTO::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
+    }
 
     public Customer fromDTO() {
         final Customer customer = new Customer();
