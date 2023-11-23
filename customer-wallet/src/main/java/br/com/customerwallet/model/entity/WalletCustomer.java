@@ -1,5 +1,6 @@
 package br.com.customerwallet.model.entity;
 
+import br.com.customerwallet.model.dto.WalletCustomerDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,12 +25,12 @@ public class WalletCustomer {
     @Column
     private Long customerId;
 
-    public WalletCustomer toDTO() {
-        final WalletCustomer walletCustomer = new WalletCustomer();
-        walletCustomer.setId(this.id);
-        walletCustomer.setBalance(this.balance);
-        walletCustomer.setCustomerId(this.customerId);
+    public WalletCustomerDTO toDTO() {
+        final WalletCustomerDTO walletCustomerDTO = new WalletCustomerDTO();
+        walletCustomerDTO.setId(this.id);
+        walletCustomerDTO.setBalance(this.balance);
+        walletCustomerDTO.setCustomerId(this.customerId);
 
-        return walletCustomer;
+        return walletCustomerDTO;
     }
 }
