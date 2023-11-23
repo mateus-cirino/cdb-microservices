@@ -42,11 +42,11 @@ public class WalletCustomerController {
     }
 
     @GetMapping(value = "/checkEnoughBalance")
-    public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal value) {
+    public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
         log.info("Iniciando o processo de checagem de saldo suficiente do wallet do customer.");
-        log.info(String.format("Dados que foram recebidos na request: customerId %s value %s", customerId.toString(), value.toString()));
+        log.info(String.format("Dados que foram recebidos na request: customerId %s amount %s", customerId.toString(), amount.toString()));
 
-        final Boolean hasEnoughBalance = walletCustomerService.checkEnoughBalance(customerId, value);
+        final Boolean hasEnoughBalance = walletCustomerService.checkEnoughBalance(customerId, amount);
 
         log.info(String.format("Tem saldo suficiente: %s", hasEnoughBalance.toString()));
 

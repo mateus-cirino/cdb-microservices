@@ -7,7 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -19,9 +21,11 @@ public class CustomerDTO {
     private String name;
 
     @NotBlank(message = "O campo documento precisa ser preenchido.")
+    @ToString.Exclude
     private String document;
 
     @NotBlank(message = "O campo email precisa ser preenchido.")
+    @ToString.Exclude
     private String email;
 
     private WalletCustomerDTO walletCustomerDTO;
@@ -29,7 +33,7 @@ public class CustomerDTO {
     private List<WalletCDBDTO> walletCDBDTOList;
 
     public BigDecimal getFullValue() {
-        return walletCustomerDTO.getBalance().add(walletCDBDTOList.stream().map(WalletCDBDTO::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
+        return Optional.ofNullable(walletCustomerDTO).map(WalletCustomerDTO::getBalance).map(it -> it.add(Optional.ofNullable(walletCDBDTOList).orElse(Collections.emptyList()).stream().map(WalletCDBDTO::getValue).reduce(BigDecimal.ZERO, BigDecimal::add))).orElse(BigDecimal.ZERO);
     }
 
     public Customer fromDTO() {

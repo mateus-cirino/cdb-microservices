@@ -8,7 +8,9 @@ import br.com.customer.service.CustomerService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +24,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/customer")
 public class CustomerController {
+
+    @Value("${customer-wallet.url}")
+    private String customerWalletUrl;
+
+    @Value("${cdb-service.url}")
+    private String cdbServiceUrl;
 
     @Autowired
     private CustomerService customerService;
@@ -38,8 +48,8 @@ public class CustomerController {
 
     @PostConstruct
     private void postConstruct() {
-        webClientCustomerWallet = WebClient.builder().baseUrl("http://localhost:8082").build();
-        webClientCDBService = WebClient.builder().baseUrl("http://localhost:8081").build();
+        webClientCustomerWallet = WebClient.builder().baseUrl(customerWalletUrl).build();
+        webClientCDBService = WebClient.builder().baseUrl(cdbServiceUrl).build();
     }
 
     @PostMapping(value = "/save")
@@ -59,52 +69,61 @@ public class CustomerController {
 
         log.info("Solicitando ao microserviço customer-wallet a criação da wallet para o customer.");
 
-        final WalletCustomerDTO newWalletCustomerDTO = webClientCustomerWallet.post()
-                .uri("/customer-wallet/save")
-                .body(BodyInserters.fromValue(walletCustomerDTO))
-                .retrieve()
-                .toEntity(WalletCustomerDTO.class)
-                .block()
-                .getBody();
+        final WalletCustomerDTO newWalletCustomerDTO = Objects.requireNonNull(webClientCustomerWallet.post()
+                        .uri("/customer-wallet/save")
+                        .body(BodyInserters.fromValue(walletCustomerDTO))
+                        .retrieve()
+                        .toEntity(WalletCustomerDTO.class)
+                        .block())
+                        .getBody();
 
-        log.info(String.format("Solicitacao concluida com sucesso, dados da wallet do customer que foi criada: %s", newWalletCustomerDTO.toString()));
+        log.info("Solicitacao concluida com sucesso, dados da wallet do customer que foi criada: {}", newWalletCustomerDTO);
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newCustomerDTO));
+        newCustomerDTO.setWalletCustomerDTO(newWalletCustomerDTO);
+
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", newCustomerDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(newCustomerDTO);
     }
 
     @GetMapping(value = "/checkEnoughBalance")
-    public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal value) {
+    public ResponseEntity<Boolean> checkEnoughBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
         log.info("Iniciando o processo de checagem de saldo suficiente do wallet do customer.");
-        log.info(String.format("Dados que foram recebidos na request: customerId %s value %s", customerId.toString(), value.toString()));
+        log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
 
         log.info("Solicitando ao microserviço customer-wallet a verificação de saldo suficiente.");
 
+        final Boolean hasEnoughBalance = Objects.requireNonNull(webClientCustomerWallet.get()
+                        .uri(uriBuilder -> uriBuilder.path("/customer-wallet/checkEnoughBalance").queryParam("customerId", customerId).queryParam("amount", amount).build())
+                        .retrieve()
+                        .toEntity(Boolean.class)
+                        .block())
+                        .getBody();
 
-        final Boolean hasEnoughBalance = webClientCustomerWallet.get()
-                .uri(uriBuilder -> uriBuilder.path("/customer-wallet/checkEnoughBalance").queryParam("customerId", customerId).queryParam("value", value).build())
-                .retrieve()
-                .toEntity(Boolean.class)
-                .block()
-                .getBody();
+        log.info("Solicitacao concluida com sucesso, tem saldo suficiente: {}", hasEnoughBalance);
 
-        log.info(String.format("Solicitacao concluida com sucesso, tem saldo suficiente: %s", hasEnoughBalance.toString()));
-
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", hasEnoughBalance));
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", hasEnoughBalance);
 
         return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
     }
 
     @GetMapping(value = "/addAmountToBalance")
     public ResponseEntity<WalletCustomerDTO> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
+        log.info("Iniciando o processo adicao de uma quantia no wallet do customer.");
+        log.info("Dados que foram recebidos na request: customerId {} amount {}", customerId, amount);
 
-        final WalletCustomerDTO walletCustomerDTOUpdated = webClientCustomerWallet.get()
-                .uri(uriBuilder -> uriBuilder.path("/customer-wallet/addAmountToBalance").queryParam("customerId", customerId).queryParam("amount", amount).build())
-                .retrieve()
-                .toEntity(WalletCustomerDTO.class)
-                .block()
-                .getBody();
+        log.info("Solicitando ao microserviço customer-wallet a adicao da quantia no wallet do customer.");
+
+        final WalletCustomerDTO walletCustomerDTOUpdated = Objects.requireNonNull(webClientCustomerWallet.get()
+                        .uri(uriBuilder -> uriBuilder.path("/customer-wallet/addAmountToBalance").queryParam("customerId", customerId).queryParam("amount", amount).build())
+                        .retrieve()
+                        .toEntity(WalletCustomerDTO.class)
+                        .block())
+                        .getBody();
+
+        log.info("Solicitacao concluida com sucesso, saldo atualizado: {}", walletCustomerDTOUpdated);
+
+        log.info("Dados que estão sendo devolvidos para a requisição: {}", walletCustomerDTOUpdated);
 
         return ResponseEntity.status(HttpStatus.OK).body(walletCustomerDTOUpdated);
     }
@@ -117,14 +136,14 @@ public class CustomerController {
 
         log.info("Solicitando ao microserviço customer-wallet a busca do wallet do customer.");
 
-        final WalletCustomerDTO walletCustomerDTO = webClientCustomerWallet.get()
-                .uri(uriBuilder -> uriBuilder.path("/customer-wallet/findById").queryParam("id", id).build())
-                .retrieve()
-                .toEntity(WalletCustomerDTO.class)
-                .block()
-                .getBody();
+        final WalletCustomerDTO walletCustomerDTO = Objects.requireNonNull(webClientCustomerWallet.get()
+                        .uri(uriBuilder -> uriBuilder.path("/customer-wallet/findById").queryParam("id", id).build())
+                        .retrieve()
+                        .toEntity(WalletCustomerDTO.class)
+                        .block())
+                        .getBody();
 
-        log.info(String.format("Solicitacao concluida com sucesso, wallet do customer: %s", walletCustomerDTO.toString()));
+        log.info(String.format("Solicitacao concluida com sucesso, wallet do customer: %s", walletCustomerDTO));
 
         customerFound.setWalletCustomerDTO(walletCustomerDTO);
 
@@ -132,14 +151,14 @@ public class CustomerController {
 
         log.info("Solicitando ao microserviço cdb-service a busca de todos os cdbs do customer.");
 
-        final List<WalletCDBDTO> walletCDBDTOList = webClientCDBService.get()
-                .uri(uriBuilder -> uriBuilder.path("/cdb-service/wallet-cdb/findAllByCustomerId").queryParam("customerId", id).build())
-                .retrieve()
-                .toEntityList(WalletCDBDTO.class)
-                .block()
-                .getBody();
+        final List<WalletCDBDTO> walletCDBDTOList = Objects.requireNonNull(webClientCDBService.get()
+                        .uri(uriBuilder -> uriBuilder.path("/cdb-service/wallet-cdb/findAllByCustomerId").queryParam("customerId", id).build())
+                        .retrieve()
+                        .toEntityList(WalletCDBDTO.class)
+                        .block())
+                        .getBody();
 
-        log.info(String.format("Solicitacao concluida com sucesso, cdbs do customer: %s", walletCDBDTOList.toString()));
+        log.info(String.format("Solicitacao concluida com sucesso, cdbs do customer: %s", walletCDBDTOList));
 
         customerFound.setWalletCDBDTOList(walletCDBDTOList);
 
