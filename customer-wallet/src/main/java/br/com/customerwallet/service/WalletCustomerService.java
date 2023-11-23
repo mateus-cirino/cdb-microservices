@@ -4,6 +4,7 @@ import br.com.customerwallet.exception.WalletCustomerNotFoundException;
 import br.com.customerwallet.exception.WalletCustomerSaveException;
 import br.com.customerwallet.model.entity.WalletCustomer;
 import br.com.customerwallet.repository.WalletCustomerRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,11 @@ public class WalletCustomerService {
         return walletCustomerRepository.findByCustomerIdAndBalanceIsGreaterThanEqual(customerId, value).isPresent();
     }
 
+    @Transactional
     public WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount) {
-        return walletCustomerRepository.addAmountToBalance(customerId, amount);
+        walletCustomerRepository.addAmountToBalance(customerId, amount);
+
+        return walletCustomerRepository.findByCustomerId(customerId);
     }
 
     public WalletCustomer findById(final Long id) {

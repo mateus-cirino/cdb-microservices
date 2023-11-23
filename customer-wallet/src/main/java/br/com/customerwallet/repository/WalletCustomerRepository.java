@@ -11,7 +11,9 @@ import java.util.Optional;
 public interface WalletCustomerRepository extends JpaRepository<WalletCustomer, Long> {
     Optional<WalletCustomer> findByCustomerIdAndBalanceIsGreaterThanEqual(final Long customerId, final BigDecimal value);
 
+    WalletCustomer findByCustomerId(final Long customerId);
+
     @Modifying
     @Query("UPDATE WalletCustomer w SET w.balance = w.balance + :amount WHERE w.customerId = :customerId")
-    WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount);
+    void addAmountToBalance(final Long customerId, final BigDecimal amount);
 }
