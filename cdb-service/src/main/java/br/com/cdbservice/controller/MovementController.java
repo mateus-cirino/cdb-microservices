@@ -50,7 +50,7 @@ public class MovementController {
             throw new NotHasEnoughBalanceException(String.format("O customer de id %s não possuí saldo suficiente para a comprar a quantidade de %s do paper de id %s. Valor total da compra do(s) paper(s) %s.", customerId, amount, paperId, value));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
+        return ResponseEntity.status(HttpStatus.OK).body(Boolean.TRUE);
     }
 
     @GetMapping(value = "/sell")
