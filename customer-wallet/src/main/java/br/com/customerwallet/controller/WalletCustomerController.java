@@ -54,8 +54,8 @@ public class WalletCustomerController {
     }
 
     @GetMapping(value = "/addAmountToBalance")
-    public ResponseEntity<BigDecimal> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
-        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerService.addAmountToBalance(customerId, amount));
+    public ResponseEntity<WalletCustomerDTO> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
+        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerService.addAmountToBalance(customerId, amount).toDTO());
     }
 
     @GetMapping(value = "/findById")

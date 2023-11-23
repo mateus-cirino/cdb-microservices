@@ -12,6 +12,6 @@ public interface WalletCustomerRepository extends JpaRepository<WalletCustomer, 
     Optional<WalletCustomer> findByCustomerIdAndBalanceIsGreaterThanEqual(final Long customerId, final BigDecimal value);
 
     @Modifying
-    @Query("UPDATE WalletCustomer w SET w.balance = w.balance + :amount WHERE w.customerId = :customerId RETURNING w.balance")
-    BigDecimal addAmountToBalance(final Long customerId, final BigDecimal value);
+    @Query("UPDATE WalletCustomer w SET w.balance = w.balance + :amount WHERE w.customerId = :customerId")
+    WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount);
 }

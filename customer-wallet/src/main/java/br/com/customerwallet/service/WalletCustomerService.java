@@ -36,7 +36,7 @@ public class WalletCustomerService {
         return walletCustomerRepository.findByCustomerIdAndBalanceIsGreaterThanEqual(customerId, value).isPresent();
     }
 
-    public BigDecimal addAmountToBalance(final Long customerId, final BigDecimal amount) {
+    public WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount) {
         return walletCustomerRepository.addAmountToBalance(customerId, amount);
     }
 

@@ -97,16 +97,16 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/addAmountToBalance")
-    public ResponseEntity<BigDecimal> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
+    public ResponseEntity<WalletCustomerDTO> addAmountToBalance(@RequestParam final Long customerId, @RequestParam final BigDecimal amount) {
 
-        final BigDecimal balanceUpdated = webClientCustomerWallet.get()
+        final WalletCustomerDTO walletCustomerDTOUpdated = webClientCustomerWallet.get()
                 .uri(uriBuilder -> uriBuilder.path("/customer-wallet/addAmountToBalance").queryParam("customerId", customerId).queryParam("amount", amount).build())
                 .retrieve()
-                .toEntity(BigDecimal.class)
+                .toEntity(WalletCustomerDTO.class)
                 .block()
                 .getBody();
 
-        return ResponseEntity.status(HttpStatus.OK).body(balanceUpdated);
+        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerDTOUpdated);
     }
 
     @GetMapping(value = "/findById")
