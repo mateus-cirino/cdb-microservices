@@ -69,7 +69,7 @@ public class CustomerController {
 
         log.info(String.format("Solicitacao concluida com sucesso, dados da wallet do customer que foi criada: %s", newWalletCustomerDTO.toString()));
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newCustomerDTO.toString()));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", newCustomerDTO));
 
         return ResponseEntity.status(HttpStatus.OK).body(newCustomerDTO);
     }
@@ -91,22 +91,10 @@ public class CustomerController {
 
         log.info(String.format("Solicitacao concluida com sucesso, tem saldo suficiente: %s", hasEnoughBalance.toString()));
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", hasEnoughBalance.toString()));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", hasEnoughBalance));
 
         return ResponseEntity.status(HttpStatus.OK).body(hasEnoughBalance);
     }
-
-//    @GetMapping(value = "/updateBalanceWalletCustomer")
-//    public ResponseEntity<WalletCustomerDTO> updateBalanceWalletCustomer(@RequestParam final Long customerId, @RequestParam final BigDecimal value) {
-//        final WalletCustomerDTO walletCustomerDTOUpdated = webClientCustomerWallet.get()
-//                .uri(uriBuilder -> uriBuilder.path("/customer/updateBalanceWalletCustomer").queryParam("customerId", customerId).queryParam("value", value).build())
-//                .retrieve()
-//                .toEntity(WalletCustomerDTO.class)
-//                .block()
-//                .getBody();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(walletCustomerDTOUpdated);
-//    }
 
     @GetMapping(value = "/findById")
     public ResponseEntity<CustomerDTO> findById(@RequestParam final Long id) {
@@ -127,7 +115,7 @@ public class CustomerController {
 
         customerFound.setWalletCustomerDTO(walletCustomerDTO);
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customerFound.toString()));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customerFound));
 
         log.info("Solicitando ao microserviço cdb-service a busca de todos os cdbs do customer.");
 
@@ -142,7 +130,7 @@ public class CustomerController {
 
         customerFound.setWalletCDBDTOList(walletCDBDTOList);
 
-        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customerFound.toString()));
+        log.info(String.format("Dados que estão sendo devolvidos para a requisição: %s", customerFound));
 
         return ResponseEntity.status(HttpStatus.OK).body(customerFound);
     }
