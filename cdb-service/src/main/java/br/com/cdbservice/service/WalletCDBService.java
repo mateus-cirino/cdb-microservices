@@ -76,7 +76,7 @@ public class WalletCDBService {
         if (optWalletCDB.isPresent()) {
             walletCDBFound = optWalletCDB.get();
         } else {
-            throw new WalletCDBNotFoundException(String.format("O walletCDB do customer de id %s e paper de id %s", customerId, paperId));
+            throw new WalletCDBNotFoundException(String.format("O walletCDB do customer de id %s e paper de id %s não foi encontrado", customerId, paperId));
         }
 
         return walletCDBFound;
