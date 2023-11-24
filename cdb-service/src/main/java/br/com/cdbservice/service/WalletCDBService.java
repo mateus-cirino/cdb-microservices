@@ -69,7 +69,6 @@ public class WalletCDBService {
     }
 
     public WalletCDB findByCustomerIdAndPaperId(final Long customerId, final Long paperId) {
-        // TODO: 23/11/2023 Criar uma unique key para customer id e paper id
         final Optional<WalletCDB> optWalletCDB = walletCDBRepository.findByCustomerIdAndPaperId(customerId, paperId);
 
         final WalletCDB walletCDBFound;

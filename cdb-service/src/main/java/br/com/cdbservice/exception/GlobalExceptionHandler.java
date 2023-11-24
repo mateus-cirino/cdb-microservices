@@ -37,4 +37,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNotHasEnoughBalanceException(NotHasEnoughBalanceException e) {
         return ResponseEntity.badRequest().body(String.format("Customer não possuí saldo suficiente: %s", e.getMessage()));
     }
+
+    @ExceptionHandler(SellMorePaperThanHaveException.class)
+    public ResponseEntity<String> handleSellMorePaperThanHaveException(SellMorePaperThanHaveException e) {
+        return ResponseEntity.badRequest().body(String.format("Tentando vender mais papeis do que de fato ele tem: %s", e.getMessage()));
+    }
 }

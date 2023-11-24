@@ -1,7 +1,8 @@
 package br.com.cdbservice.controller;
 
 import br.com.cdbservice.exception.NotHasEnoughBalanceException;
-import br.com.cdbservice.model.dto.WalletCDBDTO;
+import br.com.cdbservice.exception.SellMorePaperThanHaveException;
+import br.com.cdbservice.exception.WalletCDBNotFoundException;
 import br.com.cdbservice.model.dto.WalletCustomerUpdateDTO;
 import br.com.cdbservice.model.entity.Paper;
 import br.com.cdbservice.model.entity.WalletCDB;
@@ -24,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -63,13 +65,24 @@ public class MovementController {
                         .getBody();
 
         if (hasEnoughBalance) {
-            // TODO: 23/11/2023 E se comprar um paper duas vezes?
-            final WalletCDBDTO walletCDBDTO = new WalletCDBDTO();
-            walletCDBDTO.setPaper(paper.toDTO());
-            walletCDBDTO.setAmount(amount);
-            walletCDBDTO.setCustomerId(customerId);
+            WalletCDB walletCDB;
+            try {
+                log.info("Verificando se o customer de id {} já possui uma wallet cdb com o paper de id {}", customerId, paperId);
 
-            walletCDBService.save(walletCDBDTO.fromDTO());
+                walletCDB = walletCDBService.findByCustomerIdAndPaperId(customerId, paperId);
+                walletCDB.setAmount(Optional.ofNullable(walletCDB).map(WalletCDB::getAmount).map(it -> it.add(amount)).orElse(BigDecimal.ZERO));
+
+                log.info("Possui, não será criada outra wallet cdb, só sera atualizado a quantidade de paper nessa wallet");
+            } catch (final WalletCDBNotFoundException e) {
+                walletCDB = new WalletCDB();
+                walletCDB.setPaper(paper);
+                walletCDB.setAmount(amount);
+                walletCDB.setCustomerId(customerId);
+
+                log.info("Não foi encontrada uma wallet cdb, uma nova será criada.");
+            }
+
+            walletCDBService.save(walletCDB);
 
             final WalletCustomerUpdateDTO walletCustomerUpdateDTO = new WalletCustomerUpdateDTO();
             walletCustomerUpdateDTO.setCustomerId(customerId);
@@ -86,12 +99,21 @@ public class MovementController {
 
     @GetMapping(value = "/sell")
     public ResponseEntity<Boolean> sell(@RequestParam final Long customerId, @RequestParam final Long paperId, @RequestParam final BigDecimal amount) throws JsonProcessingException {
-        // TODO: 23/11/2023 E se não existir um CDB para esse customer e paper?
         final Paper paper = paperService.findById(paperId);
 
         final WalletCDB walletCDB = walletCDBService.findByCustomerIdAndPaperId(customerId, paperId);
 
-        walletCDBService.delete(walletCDB);
+        if (walletCDB.getAmount().compareTo(amount) < 0) {
+            throw new SellMorePaperThanHaveException(String.format("O customer de id %s tem %s papers de cdb e está tentando vender %s. Está tentando vender mais do que tem.", customerId, walletCDB.getAmount(), amount));
+        }
+
+        if (walletCDB.getAmount().compareTo(amount) > 0) {
+            walletCDB.setAmount(walletCDB.getAmount().subtract(amount));
+
+            walletCDBService.save(walletCDB);
+        } else {
+            walletCDBService.delete(walletCDB);
+        }
 
         final WalletCustomerUpdateDTO walletCustomerUpdateDTO = new WalletCustomerUpdateDTO();
         walletCustomerUpdateDTO.setCustomerId(customerId);
