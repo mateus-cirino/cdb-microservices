@@ -7,7 +7,6 @@ import br.com.customerwallet.model.entity.WalletCustomer;
 import br.com.customerwallet.repository.WalletCustomerRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -52,7 +51,6 @@ public class WalletCustomerService {
         return hasEnoughBalance;
     }
 
-    @Transactional
     public WalletCustomer addAmountToBalance(final Long customerId, final BigDecimal amount) {
         log.info("Tentando adicionar uma quantia ao wallet do customer.");
 
@@ -63,7 +61,6 @@ public class WalletCustomerService {
         return walletCustomerRepository.findByCustomerId(customerId).orElseThrow(() -> new WalletCustomerNotFoundException(String.format("Não foi encontrada uma wallet para o customer id %s", customerId)));
     }
 
-    @Transactional
     @KafkaListener(topics = updateWalletTopic)
     public void updateBalance(String message) throws JsonProcessingException {
         log.info("Recebendo uma solicitacao de update da wallet do customer via topico na url {}.", updateWalletTopic);
